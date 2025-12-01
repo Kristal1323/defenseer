@@ -1,6 +1,26 @@
 import streamlit as st
 from backend.project_manager import get_full_path
 
+try:
+    from streamlit_ace import st_ace
+    ACE_AVAILABLE = True
+except Exception:
+    ACE_AVAILABLE = False
+
+
+def _language_for_file(path: str) -> str:
+    ext = (path or "").split(".")[-1].lower()
+    return {
+        "py": "python",
+        "js": "javascript",
+        "ts": "typescript",
+        "java": "java",
+        "go": "golang",
+        "rb": "ruby",
+        "c": "c_cpp",
+        "cpp": "c_cpp",
+    }.get(ext, "python")
+
 
 def code_editor(project_state):
     """
@@ -28,16 +48,51 @@ def code_editor(project_state):
         state["active_file"] = active_file
         state["project_name"] = project_name
 
-    # Use a widget key that incorporates project+file so switching files refreshes content
     widget_key = f"code_editor_{project_name}_{active_file}"
 
-    content = st.text_area(
-        "Code Editor",
-        value=state.get("content", ""),
-        height=300,
-        placeholder="# Paste your code here...",
-        key=widget_key,
-    )
+    # Prefer Ace editor if available for syntax + line numbers
+    if ACE_AVAILABLE:
+        language = _language_for_file(active_file or "")
+        content = st_ace(
+            value=state.get("content", ""),
+            language=language,
+            theme="monokai",
+            key=widget_key,
+            height=320,
+            show_gutter=True,
+            tab_size=4,
+            wrap=False,
+            auto_update=True,
+            min_lines=10,
+        )
+    else:
+        # Dark-themed fallback
+        st.markdown(
+            """
+            <style>
+            textarea[data-testid="stTextArea"] {
+                font-family: Menlo, Consolas, monospace;
+                background-color: #0f172a;
+                color: #e2e8f0;
+                border: 1px solid #1f2937;
+                border-radius: 6px;
+            }
+            textarea[data-testid="stTextArea"]:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35);
+                outline: none;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        content = st.text_area(
+            "Code Editor",
+            value=state.get("content", ""),
+            height=320,
+            placeholder="# Paste your code here...",
+            key=widget_key,
+        )
 
     # Persist edits to session so reruns keep the typed code
     state["content"] = content
