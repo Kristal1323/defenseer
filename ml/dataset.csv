@@ -1,0 +1,220 @@
+text,label
+Use of insecure MD5 hash function.,real
+SHA1 used for password hashing.,real
+Possible SQL injection via Python string formatting.,real
+SQL query built using f-strings with unsanitized input.,real
+Dynamic SQL constructed using % operator in Python.,real
+pickle.loads used on untrusted data.,real
+pickle.load called on external file without validation.,real
+Unsafe yaml.load used without Loader=SafeLoader.,real
+subprocess.Popen invoked with shell=True.,real
+os.system called with user-controlled input.,real
+Command injection possible via concatenated shell command.,real
+eval() executed on user-provided string.,real
+exec() used to run dynamic input.,real
+Weak cryptography: hashlib.md5 used for security context.,real
+hashlib.sha1 used for sensitive hashing.,real
+open() called with unvalidated path input.,real
+tarfile.extractall used without members checking.,real
+Potential ZIP Slip: zipfile.extractall used unsafely.,real
+User input directly used in HTTP response (XSS).,real
+jinja2.Template rendering unsanitized user input.,real
+xml.etree parsed without disabling DTD (XXE).,real
+Django DEBUG=True in production code.,real
+Flask debug mode enabled in deployed app.,real
+Use of assert for access control checks.,real
+Regex pattern vulnerable to ReDoS attack.,real
+Potential DOS: unbounded recursion in Python loop.,real
+User-controlled arguments passed to subprocess.run.,real
+requests.get called with verify=False.,real
+urllib3 made insecure request with CERT_NONE.,real
+secrets not used for generating tokens.,real
+random.random used for session IDs.,real
+Hardcoded AWS secret key detected.,real
+Hardcoded password found in Python code.,real
+JWT verification disabled (verify=False).,real
+Unsafe temp file creation using tempfile.mktemp.,real
+Path traversal detected in Python path join logic.,real
+eval() used with user input in JavaScript.,real
+Function constructor used on unsafe user-controlled string.,real
+innerHTML assigned from unsanitized input (XSS).,real
+document.write used with dynamic data.,real
+jQuery.html() executed with untrusted input.,real
+fs.readFile reading file path from request param.,real
+fs.writeFile writing to untrusted path.,real
+child_process.exec used with user input.,real
+child_process.spawn called with shell option enabled.,real
+mongo query built from unsanitized input (NoSQL injection).,real
+User-controlled input passed into res.send() without encoding.,real
+Express.js: res.render invoked with unsanitized variables.,real
+Helmet security middleware disabled.,real
+CORS misconfiguration: Access-Control-Allow-Origin: *.,real
+JWT verification skipped using ignoreExpiration.,real
+Hardcoded API secret in Node.js config.,real
+bcrypt hash generated with too few rounds.,real
+Insecure crypto: crypto.createHash('md5').,real
+Weak random generation using Math.random() for tokens.,real
+LocalStorage used to store JWT tokens.,real
+XSS via template literal injection in JS.,real
+Open redirect in Node.js via query parameter.,real
+Command injection via backticks template string.,real
+Prototype pollution: Object.assign used unsafely.,real
+Express route parameter used to load module (RCE).,real
+SQL injection in Java using concatenated query string.,real
+PreparedStatement constructed via string concatenation.,real
+User input passed to Runtime.getRuntime().exec().,real
+Java deserialization using ObjectInputStream on untrusted data.,real
+Insecure XML parser without disabling external entities (XXE).,real
+Spring MVC: @RequestParam used directly in SQL query.,real
+JSP directly embedding user input in output.,real
+JPA/Hibernate dynamic HQL built from string concatenation.,real
+Hardcoded database password in Java class.,real
+Weak cryptography: MessageDigest.getInstance('MD5').,real
+Weak crypto: SHA1 hashing in security-sensitive context.,real
+Insecure random using java.util.Random for token generation.,real
+Dangerous reflection using Class.forName on user input.,real
+Log injection: user-controlled input written to application logs.,real
+Android: WebView.loadUrl with unsanitized string.,real
+Serializable class exposing sensitive fields accidentally.,real
+Trusting all certificates using X509TrustManager that accepts all.,real
+Host name verification disabled using setHostnameVerifier.,real
+LDAP injection via concatenated LDAP query string.,real
+Path traversal using java.io.File with unvalidated path.,real
+Zip Slip vulnerability using java.util.zip.ZipInputStream.,real
+Bypassing SSL verification using TrustAllManager.,real
+JavaScript injection inside JSP via <%= userInput %>.,real
+Remote Method Invocation without security manager.,real
+SQL injection in Go using fmt.Sprintf with user data.,real
+Building SQL strings manually without parameter binding.,real
+os/exec Command constructed from user-controlled input.,real
+Using ioutil.ReadFile on untrusted path.,real
+Hardcoded credentials found in Go source file.,real
+Weak crypto: md5.Sum used for security purpose.,real
+Weak crypto: sha1.Sum used for authentication.,real
+Path traversal using filepath.Join without validation.,real
+Insecure random using math/rand for security tokens.,real
+Gorilla sessions cookie store with weak secret key.,real
+HTTP header injection via unescaped user input.,real
+Template injection in html/template due to unsafe usage.,real
+Compression bomb risk: unbounded gzip reader.,real
+XML parsing without disabling external entity references.,real
+Panic leakage: exposing internal errors via fmt.Println.,real
+Open redirect vulnerability via http.Redirect.,real
+Unbounded goroutine creation leading to DOS.,real
+No timeout on HTTP client requests.,real
+No input validation before JSON unmarshalling.,real
+Buffer overflow via strcpy without bounds checking.,real
+strcat used without validating destination buffer size.,real
+Unsafe use of gets() allowing arbitrary overwrite.,real
+sprintf used instead of snprintf leading to overflow risk.,real
+Integer overflow in arithmetic before memory allocation.,real
+Use-after-free detected in pointer access.,real
+Double free vulnerability risk in deallocation code.,real
+Uninitialized memory read exposing sensitive data.,real
+Format string vulnerability using printf(userInput).,real
+Memory leak due to missing free() call.,real
+Heap overflow due to unchecked malloc result.,real
+Stack overflow in recursive function lacking depth checks.,real
+Race condition on shared variable without locking.,real
+TOCTOU (time-of-check to time-of-use) filesystem race.,real
+Calling system() with unvalidated user input.,real
+Arbitrary file read via fopen on controlled path.,real
+Use of strcpy in security-sensitive authentication routine.,real
+Ignoring return value of read() leading to partial reads.,real
+Dangling pointer dereference after free().,real
+Null pointer dereference from unchecked memory allocation.,real
+Insecure PRNG using rand() for cryptographic purpose.,real
+Hardcoded credentials in embedded C firmware.,real
+Improper bounds check in memcpy leading to overflow.,real
+Potential ROP attack due to executable stack.,real
+Reflected XSS: unsanitized user input returned in HTML.,real
+Stored XSS: user input saved to DB and rendered across pages.,real
+DOM XSS via direct assignment to innerHTML.,real
+CSRF vulnerability: missing anti-CSRF token.,real
+Clickjacking risk: missing X-Frame-Options header.,real
+Open redirect using unvalidated URL parameter.,real
+Response splitting via CRLF injection.,real
+Session fixation vulnerability due to static session IDs.,real
+Session cookie missing HttpOnly flag.,real
+Session cookie missing Secure flag.,real
+Cookie with SameSite=None without Secure set.,real
+Sensitive data exposed in URL query string.,real
+Template injection detected in server-side templating engine.,real
+Host header injection due to missing validation.,real
+JWT token without signature verification.,real
+Insufficient password complexity enforcement.,real
+Weak password reset token generation.,real
+Insecure CORS: Access-Control-Allow-Origin: * for sensitive endpoints.,real
+GraphQL endpoint missing depth/complexity limits.,real
+File upload endpoint missing file type validation.,real
+Content Security Policy missing or too permissive.,real
+Directory indexing enabled on web server.,real
+TLS version outdated or insecure (TLS 1.0/1.1).,real
+HSTS header missing on production domain.,real
+Hardcoded API key in web application source.,real
+Rate limiting not implemented on authentication endpoint.,real
+Brute-force protection missing on login route.,real
+Error messages revealing stack traces to users.,real
+Verbose 500 errors leaking exception details.,real
+Terraform security group allows ingress from 0.0.0.0/0.,real
+Terraform AWS S3 bucket without server-side encryption.,real
+Terraform IAM policy overly permissive: Action='*'.,real
+Hardcoded AWS credentials in Terraform variable.,real
+Dockerfile uses root user.,real
+Dockerfile exposes SSH port 22 unnecessarily.,real
+Dockerfile runs apt-get update without pinning versions.,real
+Dockerfile copies SSH private keys into image.,real
+Kubernetes pod running privileged: true.,real
+Kubernetes container requesting hostPID access.,real
+Kubernetes container mounts host filesystem.,real
+Kubernetes service type LoadBalancer exposed publicly.,real
+Kubernetes container lacks resource limits.,real
+IAM access key embedded in YAML config.,real
+Azure Storage key found in environment file.,real
+GCP service account key stored in repo.,real
+Exposed .env file committed to source control.,real
+TLS disabled on Kubernetes ingress resource.,real
+Terraform instance metadata API left unrestricted.,real
+Publicly exposed RDS instance configured in Terraform.,real
+Hardcoded AWS secret key detected.,real
+Hardcoded AWS access key ID detected.,real
+Hardcoded GitHub personal access token (PAT).,real
+API key found in source code.,real
+Database password committed to repository.,real
+Slack bot token leaked in JavaScript file.,real
+JWT secret found in config.,real
+Private SSH key detected in repo.,real
+Stripe API secret published.,real
+Twilio auth token in plaintext.,real
+Google API key leaked.,real
+Hardcoded OAuth client secret.,real
+Unencrypted connection string in config file.,real
+Azure access key leaked.,real
+Firebase server key exposed.,real
+Logging debug message with variable interpolation.,false_positive
+Using print() for debugging output in Python.,false_positive
+Creating a dictionary using comprehension.,false_positive
+Using f-strings for formatting non-SQL text.,false_positive
+Accessing environment variables via os.getenv.,false_positive
+Opening a local config file for reading.,false_positive
+Function performing safe string manipulation.,false_positive
+Regex compiled but used safely.,false_positive
+Calling subprocess without shell=True and static args.,false_positive
+Safe YAML loader used: yaml.safe_load.,false_positive
+console.log displaying variable values.,false_positive
+Using JSON.parse on trusted static JSON.,false_positive
+Using template literals for non-DOM strings.,false_positive
+Checking request.params value in Express route.,false_positive
+Local variable assignment in JS module.,false_positive
+Setting textContent property in DOM.,false_positive
+Static HTML template string with no variables.,false_positive
+Commented-out debug code.,false_positive
+Unused import statement.,false_positive
+Whitespace or formatting change.,false_positive
+Refactoring code without logic changes.,false_positive
+Configuration file setting unrelated to security.,false_positive
+Static constant definition in Java.,false_positive
+Variable assigned static test data.,false_positive
+Output printed to console for logging.,false_positive
+Function parameter not used (benign).,false_positive
+File path constant defined but not used.,false_positive
