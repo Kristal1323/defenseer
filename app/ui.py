@@ -1,4 +1,12 @@
 import streamlit as st
+import sys
+from pathlib import Path
+
+# Ensure project root is on sys.path so `app.*` imports work even when cwd is app/
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from app.components.project_selector import project_selector
 from app.components.code_editor import code_editor
 from app.components.output_console import output_console
