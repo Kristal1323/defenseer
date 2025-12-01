@@ -30,22 +30,22 @@ def main():
             st.rerun()
         st.stop()
 
-    col1, col2 = st.columns([1, 1])
-
-    with col1:
-        st.subheader("📄 Code Editor")
+    st.subheader("📄 Code Editor")
+    cols = st.columns([1, 1])
+    with cols[0]:
         if st.button("Open fullscreen editor"):
             st.session_state["show_editor_fullscreen"] = True
             st.rerun()
+    with cols[1]:
+        run_now = st.button("▶ Run Code", use_container_width=True)
 
-        pasted_code = code_editor(project_state, full_screen=False, key_prefix="main_")
-        output_console(project_state, pasted_code)
+    pasted_code = code_editor(project_state, full_screen=False, key_prefix="main_")
+    output_console(project_state, pasted_code, run_triggered=run_now, show_button=False)
 
-    with col2:
-        st.subheader("🔍 Vulnerability Analysis")
-        vulnerability_panel(project_state, pasted_code)
-        st.subheader("🧠 Suggested Fixes (AI)")
-        fix_suggestions(project_state)
+    st.subheader("🔍 Vulnerability Analysis")
+    vulnerability_panel(project_state, pasted_code)
+    st.subheader("🧠 AI Fix Suggestions")
+    fix_suggestions(project_state)
 
 if __name__ == "__main__":
     main()

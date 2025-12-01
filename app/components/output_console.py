@@ -15,7 +15,7 @@ def _looks_like_streamlit_launcher(code: str, path: str) -> bool:
     )
 
 
-def output_console(project_state, pasted_code):
+def output_console(project_state, pasted_code, run_triggered: bool = False, show_button: bool = True):
     """
     Executes either:
     - the selected project file, or
@@ -26,8 +26,11 @@ def output_console(project_state, pasted_code):
     project_name = project_state["project_name"]
     active_file = project_state["active_file"]
 
-    # UI Button
-    if st.button("▶ Run Code", use_container_width=True):
+    # UI Button (optional)
+    if show_button:
+        run_triggered = st.button("▶ Run Code", use_container_width=True)
+
+    if run_triggered:
         st.write("Running code...")
 
         # If a file is selected → run that file
