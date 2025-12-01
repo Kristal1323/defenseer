@@ -1,15 +1,16 @@
 import streamlit as st
-from components.project_selector import project_selector
-from components.code_editor import code_editor
-from components.output_console import output_console
-from components.vulnerability_panel import vulnerability_panel
-from components.fix_suggestions import fix_suggestions
+from app.components.project_selector import project_selector
+from app.components.code_editor import code_editor
+from app.components.output_console import output_console
+from app.components.vulnerability_panel import vulnerability_panel
+from app.components.fix_suggestions import fix_suggestions
 
 st.set_page_config(
     page_title="DefenSeer",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
 
 def main():
     st.title("🛡️ DefenSeer — AI-Augmented Secure Code Runner")
@@ -46,6 +47,7 @@ def main():
     vulnerability_panel(project_state, pasted_code)
     st.subheader("🧠 AI Fix Suggestions")
     fix_suggestions(project_state)
+
 
 if __name__ == "__main__":
     main()
