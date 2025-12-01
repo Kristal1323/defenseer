@@ -22,7 +22,7 @@ def _language_for_file(path: str) -> str:
     }.get(ext, "python")
 
 
-def code_editor(project_state):
+def code_editor(project_state, full_screen: bool = False, key_prefix: str = ""):
     """
     Text editor for pasted code. If a project file is selected, load its contents
     into the editor and keep in sync when the selection changes.
@@ -48,7 +48,7 @@ def code_editor(project_state):
         state["active_file"] = active_file
         state["project_name"] = project_name
 
-    widget_key = f"code_editor_{project_name}_{active_file}"
+    widget_key = f"{key_prefix}code_editor_{project_name}_{active_file}"
 
     # Prefer Ace editor if available for syntax + line numbers
     if ACE_AVAILABLE:
@@ -58,7 +58,7 @@ def code_editor(project_state):
             language=language,
             theme="monokai",
             key=widget_key,
-            height=320,
+            height=520 if full_screen else 320,
             show_gutter=True,
             tab_size=4,
             wrap=False,
@@ -89,7 +89,7 @@ def code_editor(project_state):
         content = st.text_area(
             "Code Editor",
             value=state.get("content", ""),
-            height=320,
+            height=520 if full_screen else 320,
             placeholder="# Paste your code here...",
             key=widget_key,
         )

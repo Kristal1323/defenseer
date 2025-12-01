@@ -20,21 +20,32 @@ def main():
 
     st.divider()
 
+    # Fullscreen editor mode
+    if st.session_state.get("show_editor_fullscreen"):
+        st.subheader("📄 Code Editor (Fullscreen)")
+        pasted_code = code_editor(project_state, full_screen=True, key_prefix="full_")
+        output_console(project_state, pasted_code)
+        if st.button("Close fullscreen editor"):
+            st.session_state["show_editor_fullscreen"] = False
+            st.rerun()
+        st.stop()
+
     col1, col2 = st.columns([1, 1])
 
     with col1:
         st.subheader("📄 Code Editor")
-        pasted_code = code_editor(project_state)
+        if st.button("Open fullscreen editor"):
+            st.session_state["show_editor_fullscreen"] = True
+            st.rerun()
 
-        st.subheader("▶️ Program Output")
+        pasted_code = code_editor(project_state, full_screen=False, key_prefix="main_")
         output_console(project_state, pasted_code)
 
     with col2:
         st.subheader("🔍 Vulnerability Analysis")
         vulnerability_panel(project_state, pasted_code)
-
-    st.subheader("🧠 Suggested Fixes (AI)")
-    fix_suggestions(project_state)
+        st.subheader("🧠 Suggested Fixes (AI)")
+        fix_suggestions(project_state)
 
 if __name__ == "__main__":
     main()
