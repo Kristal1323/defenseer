@@ -50,7 +50,7 @@ def output_console(project_state, pasted_code):
             return
 
         # Run sandbox
-        result = run_code_sandbox(project_name, code)
+        result = run_code_sandbox(project_name, code, main_rel_path=active_file if active_file else None)
 
         # Display results
         if not result["success"]:
