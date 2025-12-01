@@ -22,7 +22,7 @@ def fix_suggestions(project_state):
 
     ai_results = st.session_state.setdefault("ai_fix_results", {})
 
-    if st.button("Generate AI Fixes", disabled=not has_issues):
+    if st.button("⚙️ Generate AI Fixes", disabled=not has_issues):
         with st.spinner("Requesting AI fixes..."):
             ai_results.clear()
             for idx, issue in enumerate(issues):

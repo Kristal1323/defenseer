@@ -22,7 +22,7 @@ def main():
 
     # Fullscreen editor mode
     if st.session_state.get("show_editor_fullscreen"):
-        st.subheader("📄 Code Editor (Fullscreen)")
+        st.subheader("🖥 Code Editor (Fullscreen)")
         pasted_code = code_editor(project_state, full_screen=True, key_prefix="full_")
         output_console(project_state, pasted_code)
         if st.button("Close fullscreen editor"):
@@ -30,7 +30,7 @@ def main():
             st.rerun()
         st.stop()
 
-    st.subheader("📄 Code Editor")
+    st.subheader("🖥 Code Editor")
     cols = st.columns([1, 1])
     with cols[0]:
         if st.button("Open fullscreen editor"):
