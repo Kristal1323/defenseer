@@ -18,13 +18,14 @@ def main():
         st.header("📂 Projects")
         project_state = project_selector()
 
-        st.divider()
-        st.header("📄 Code Input")
-        pasted_code = code_editor()
+    st.divider()
 
     col1, col2 = st.columns([1, 1])
 
     with col1:
+        st.subheader("📄 Code Editor")
+        pasted_code = code_editor(project_state)
+
         st.subheader("▶️ Program Output")
         output_console(project_state, pasted_code)
 

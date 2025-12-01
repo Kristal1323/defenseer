@@ -1,12 +1,44 @@
 import streamlit as st
+from backend.project_manager import get_full_path
 
-def code_editor():
+
+def code_editor(project_state):
     """
-    Text editor for pasted code.
+    Text editor for pasted code. If a project file is selected, load its contents
+    into the editor and keep in sync when the selection changes.
     """
-    return st.text_area(
-        "Code Editor",
-        value="",
-        height=300,
-        placeholder="# Paste your Python code here...",
+    state = st.session_state.setdefault(
+        "editor_state", {"project_name": None, "active_file": None, "content": ""}
     )
+
+    active_file = project_state.get("active_file")
+    project_name = project_state.get("project_name")
+
+    # When a new file is selected, load it into the editor
+    if active_file and (
+        active_file != state.get("active_file")
+        or project_name != state.get("project_name")
+    ):
+        try:
+            with open(get_full_path(project_name, active_file), "r", encoding="utf-8") as f:
+                state["content"] = f.read()
+        except Exception as e:
+            st.warning(f"Could not load {active_file}: {e}")
+            state["content"] = ""
+        state["active_file"] = active_file
+        state["project_name"] = project_name
+
+    # Use a widget key that incorporates project+file so switching files refreshes content
+    widget_key = f"code_editor_{project_name}_{active_file}"
+
+    content = st.text_area(
+        "Code Editor",
+        value=state.get("content", ""),
+        height=300,
+        placeholder="# Paste your code here...",
+        key=widget_key,
+    )
+
+    # Persist edits to session so reruns keep the typed code
+    state["content"] = content
+    return content

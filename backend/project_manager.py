@@ -2,6 +2,7 @@ import os
 import zipfile
 from pathlib import Path
 from typing import List, Dict
+import shutil
 
 WORKSPACE_DIR = Path("workspace")
 WORKSPACE_DIR.mkdir(exist_ok=True)
@@ -70,6 +71,9 @@ def list_project_files(project_name: str) -> List[str]:
         rel_parts = file.relative_to(project_path).parts
         if any(part == ".tmp" for part in rel_parts):
             continue
+        # Skip macOS resource fork files from zips
+        if file.name.startswith("._") or "__MACOSX" in rel_parts:
+            continue
 
         if file.suffix.lower() in allowed_exts:
             rel = file.relative_to(project_path)
@@ -93,6 +97,21 @@ def clean_temp_files(project_name: str):
             except Exception:
                 pass
     except Exception:
+        pass
+
+
+def delete_project(project_name: str):
+    """
+    Removes an entire project directory under workspace/.
+    Intended for resets/cleanup after uploads.
+    """
+    project_path = WORKSPACE_DIR / project_name
+    try:
+        shutil.rmtree(project_path)
+    except FileNotFoundError:
+        pass
+    except Exception:
+        # ignore cleanup errors
         pass
 
 

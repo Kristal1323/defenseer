@@ -5,6 +5,7 @@ from backend.project_manager import (
     save_uploaded_zip,
     list_project_files,
     clean_temp_files,
+    delete_project,
 )
 
 
@@ -16,7 +17,6 @@ def project_selector():
     state = st.session_state.setdefault(
         "project_state", {"project_name": "default_project", "active_file": None}
     )
-
     st.write("Create or select a project:")
     project_name = st.text_input(
         "Project Name",
@@ -31,6 +31,14 @@ def project_selector():
         create_project(project_name)
         st.success(f"Project '{project_name}' ready.")
         state["project_name"] = project_name
+
+    # Clear workspace on demand (placed near create/load)
+    if st.button("🧹 Clear workspace (delete project files)"):
+        delete_project(project_name)
+        state["active_file"] = None
+        # Clear editor content as well
+        st.session_state.pop("editor_state", None)
+        st.rerun()
 
     st.divider()
     st.write("### Upload Code")
@@ -53,19 +61,52 @@ def project_selector():
         st.success("ZIP extracted successfully.")
 
     st.divider()
-    st.write("### Project Files")
+    st.write(f"### Project Files — `{project_name}`")
 
     file_list = list_project_files(project_name)
     if not file_list:
         st.info("No source files found in this project yet.")
         return state
 
-    # Simple tree-like view via relative paths
+    # Build a proper folder-aware tree for display
+    def build_tree(paths):
+        tree = {}
+        for p in paths:
+            parts = p.split("/")
+            node = tree
+            for i, part in enumerate(parts):
+                if i == len(parts) - 1:
+                    node.setdefault("_files", set()).add(part)
+                else:
+                    node = node.setdefault(part, {})
+        return tree
+
+    def render_tree(node, prefix=""):
+        lines = []
+        dirs = sorted(k for k in node.keys() if k != "_files")
+        for d in dirs:
+            lines.append(f"{prefix}📁 {d}")
+            lines.extend(render_tree(node[d], prefix + "    "))
+        files = sorted(node.get("_files", []))
+        for f in files:
+            lines.append(f"{prefix}└─ {f}")
+        return lines
+
+    tree = build_tree(file_list)
+    tree_entries = [f"📁 {project_name}"] + render_tree(tree, "    ")
+    st.markdown("```\n" + "\n".join(tree_entries) + "\n```")
+
+    # Build simple labels for the radio list using full relative paths
+    labels = {}
+    sorted_files = sorted(file_list)
+    for path in sorted_files:
+        labels[path] = f"{project_name}/{path}"
+
     active_file = st.radio(
         "Select a file to open:",
-        options=file_list,
-        index=file_list.index(state["active_file"]) if state["active_file"] in file_list else 0,
-        format_func=lambda p: p,
+        options=sorted_files,
+        index=sorted_files.index(state["active_file"]) if state["active_file"] in sorted_files else 0,
+        format_func=lambda p: labels.get(p, p),
     )
 
     state.update({"project_name": project_name, "active_file": active_file})
