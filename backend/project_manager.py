@@ -54,20 +54,26 @@ def save_uploaded_zip(project_name: str, zip_file) -> Path:
 
 def list_project_files(project_name: str) -> List[str]:
     """
-    Returns a list of all .py files inside the project's folder structure.
+    Returns a list of source files inside the project's folder structure.
     Paths are returned relative to project root.
     """
     project_path = WORKSPACE_DIR / project_name
     if not project_path.exists():
         return []
 
+    allowed_exts = {".py", ".js", ".ts", ".java", ".go", ".rb", ".c", ".cpp"}
     files = []
-    for file in project_path.rglob("*.py"):
-        # Skip temp files under .tmp
-        if any(part == ".tmp" for part in file.relative_to(project_path).parts):
+    for file in project_path.rglob("*"):
+        if not file.is_file():
             continue
-        rel = file.relative_to(project_path)
-        files.append(str(rel))
+        # Skip temp files under .tmp
+        rel_parts = file.relative_to(project_path).parts
+        if any(part == ".tmp" for part in rel_parts):
+            continue
+
+        if file.suffix.lower() in allowed_exts:
+            rel = file.relative_to(project_path)
+            files.append(str(rel))
 
     return sorted(files)
 

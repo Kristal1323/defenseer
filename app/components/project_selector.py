@@ -7,24 +7,38 @@ from backend.project_manager import (
     clean_temp_files,
 )
 
+
 def project_selector():
+    """
+    Sidebar project manager with multi-file support and simple tree view.
+    Keeps project + active file in session so state persists across reruns.
+    """
+    state = st.session_state.setdefault(
+        "project_state", {"project_name": "default_project", "active_file": None}
+    )
+
     st.write("Create or select a project:")
-    project_name = st.text_input("Project Name", value="default_project")
+    project_name = st.text_input(
+        "Project Name",
+        value=state.get("project_name", "default_project"),
+        key="project_name_input",
+    )
 
     # Clean temp files on each render to avoid clutter from previous runs
     clean_temp_files(project_name)
 
-    if st.button("Create Project"):
+    if st.button("Create/Load Project"):
         create_project(project_name)
-        st.success(f"Project '{project_name}' created.")
+        st.success(f"Project '{project_name}' ready.")
+        state["project_name"] = project_name
 
     st.divider()
     st.write("### Upload Code")
 
-    # Upload .py files
+    # Upload multiple source files
     uploaded_files = st.file_uploader(
-        "Upload Python files (.py)",
-        type=["py"],
+        "Upload source files",
+        type=["py", "js", "ts", "java", "go", "rb", "c", "cpp"],
         accept_multiple_files=True,
     )
 
@@ -43,16 +57,16 @@ def project_selector():
 
     file_list = list_project_files(project_name)
     if not file_list:
-        st.info("No Python files found in this project yet.")
-        return {"project_name": project_name, "active_file": None}
+        st.info("No source files found in this project yet.")
+        return state
 
-    active_file = st.selectbox(
-        "Select a file to run/analyze:",
-        file_list,
-        index=0,
+    # Simple tree-like view via relative paths
+    active_file = st.radio(
+        "Select a file to open:",
+        options=file_list,
+        index=file_list.index(state["active_file"]) if state["active_file"] in file_list else 0,
+        format_func=lambda p: p,
     )
 
-    return {
-        "project_name": project_name,
-        "active_file": active_file,
-    }
+    state.update({"project_name": project_name, "active_file": active_file})
+    return state
