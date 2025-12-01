@@ -63,10 +63,31 @@ def list_project_files(project_name: str) -> List[str]:
 
     files = []
     for file in project_path.rglob("*.py"):
+        # Skip temp files under .tmp
+        if any(part == ".tmp" for part in file.relative_to(project_path).parts):
+            continue
         rel = file.relative_to(project_path)
         files.append(str(rel))
 
     return sorted(files)
+
+
+def clean_temp_files(project_name: str):
+    """
+    Removes transient files under workspace/<project>/.tmp.
+    Safe to call repeatedly; ignores errors.
+    """
+    tmp_dir = WORKSPACE_DIR / project_name / ".tmp"
+    if not tmp_dir.exists():
+        return
+    try:
+        for f in tmp_dir.glob("*.py"):
+            try:
+                f.unlink()
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 
 def get_full_path(project_name: str, relative_path: str) -> Path:

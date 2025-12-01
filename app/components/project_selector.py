@@ -4,11 +4,15 @@ from backend.project_manager import (
     save_uploaded_files,
     save_uploaded_zip,
     list_project_files,
+    clean_temp_files,
 )
 
 def project_selector():
     st.write("Create or select a project:")
     project_name = st.text_input("Project Name", value="default_project")
+
+    # Clean temp files on each render to avoid clutter from previous runs
+    clean_temp_files(project_name)
 
     if st.button("Create Project"):
         create_project(project_name)

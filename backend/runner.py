@@ -87,3 +87,9 @@ def run_code_sandbox(project_name: str, code: str, timeout: int = 3):
 
     except Exception as e:
         raise SandboxError(f"Sandbox execution failed: {e}")
+    finally:
+        # Clean up temp file to avoid cluttering workspace
+        try:
+            Path(filepath).unlink(missing_ok=True)
+        except Exception:
+            pass
