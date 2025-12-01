@@ -1,0 +1,7 @@
+streamlit
+streamlit-ace
+openai
+bandit
+joblib
+scikit-learn
+pandas
