@@ -1,85 +1,47 @@
 import json
 import subprocess
-import sys
-from pathlib import Path
-from backend.utils import save_temp_script
-from backend.project_manager import get_full_path
+import re
+import os
 
 
 class BanditError(Exception):
-    """Raised when Bandit analysis fails."""
     pass
 
 
-def extract_json_from_output(stdout: str, stderr: str):
+def extract_json_block(text: str):
     """
-    Bandit sometimes prints JSON to stdout OR stderr depending on OS,
-    and may prepend warnings before the JSON.
-
-    This function extracts the JSON object from either stream.
+    Extracts the last JSON object from arbitrary text.
+    Bandit sometimes prints INFO logs before JSON, so we find the LAST {...} block.
     """
-    for stream in (stdout, stderr):
-        first_brace = stream.find("{")
-        if first_brace != -1:
-            return stream[first_brace:]
+    json_matches = list(re.finditer(r"\{.*\}", text, re.DOTALL))
+    if not json_matches:
+        raise BanditError("No JSON block found in Bandit output.")
 
-    # Nothing found → show stderr for debugging
-    raise BanditError(
-        f"No JSON found in Bandit output.\nSTDERR was:\n{stderr}"
-    )
+    # Use LAST match (Bandit prints logs before JSON)
+    json_text = json_matches[-1].group(0)
+    return json_text
 
 
-def run_bandit_on_code(project_name: str, code: str):
-    temp_path = save_temp_script(project_name, code)
-    return run_bandit_on_file(temp_path)
+def run_bandit_on_file(path: str):
+    if not os.path.exists(path):
+        raise FileNotFoundError(path)
 
-
-def run_bandit_on_file(file_path: Path):
-    cmd = [
-        sys.executable,
-        "-m",
-        "bandit",
-        "-f",
-        "json",
-        "-q",
-        str(file_path)
-    ]
-
+    cmd = ["bandit", "-f", "json", path]
     try:
         result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
+            cmd, capture_output=True, text=True
         )
     except Exception as e:
-        raise BanditError(f"Bandit execution failed: {e}")
+        raise BanditError(f"Failed to run Bandit: {e}")
 
-    if result.returncode not in (0, 1):
-        raise BanditError(f"Bandit scan failed with stderr:\n{result.stderr}")
+    raw_output = result.stdout + "\n" + result.stderr
 
-    # ----- FIX: Extract JSON from stdout OR stderr -----
     try:
-        json_str = extract_json_from_output(result.stdout, result.stderr)
-        bandit_json = json.loads(json_str)
+        json_block = extract_json_block(raw_output)
+        data = json.loads(json_block)
     except Exception as e:
         raise BanditError(f"Failed to parse Bandit JSON output: {e}")
 
-    return parse_bandit_results(bandit_json)
-
-
-def parse_bandit_results(bandit_json: dict):
-    issues = []
-
-    for issue in bandit_json.get("results", []):
-        issues.append({
-            "filename": issue.get("filename"),
-            "line_number": issue.get("line_number"),
-            "severity": issue.get("issue_severity"),
-            "confidence": issue.get("issue_confidence"),
-            "text": issue.get("issue_text"),
-            "code": issue.get("code", "").strip(),
-            "test_id": issue.get("test_id"),
-            "test_name": issue.get("test_name"),
-        })
-
+    # Extract results list
+    issues = data.get("results", [])
     return issues

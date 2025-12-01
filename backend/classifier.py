@@ -1,35 +1,44 @@
-import pickle
-from pathlib import Path
-
-VEC_PATH = Path("ml/vectorizer.pkl")
-MODEL_PATH = Path("ml/model.pkl")
-
-
-class MLClassifier:
-    def __init__(self):
-        try:
-            with open(VEC_PATH, "rb") as f:
-                self.vectorizer = pickle.load(f)
-
-            with open(MODEL_PATH, "rb") as f:
-                self.model = pickle.load(f)
-
-            self.loaded = True
-        except Exception:
-            self.loaded = False
-
-    def classify(self, issue_text: str) -> str:
-        """
-        Returns 'real' or 'false_positive'.
-        If classifier not loaded, defaults to 'real'.
-        """
-        if not self.loaded:
-            return "real"
-
-        X = self.vectorizer.transform([issue_text])
-        pred = self.model.predict(X)[0]
-        return pred
+import os
+import joblib
+from ml.train_classifier import EnsembleClassifier  # ensure class available for unpickling
+import sys
 
 
-# Singleton instance for easy importing
-ml_classifier = MLClassifier()
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ml", "model.pkl")
+VECTORIZER_PATH = os.path.join(os.path.dirname(__file__), "..", "ml", "vectorizer.pkl")
+
+
+class ClassifierSingleton:
+    _model = None
+    _vectorizer = None
+
+    @classmethod
+    def load(cls):
+        # The model was pickled when EnsembleClassifier lived in __main__ during training,
+        # so expose the class under __main__ to satisfy unpickling.
+        sys.modules["__main__"].EnsembleClassifier = EnsembleClassifier
+
+        if cls._model is None or cls._vectorizer is None:
+            print("[INFO] Loading ML model + vectorizer...")
+            cls._model = joblib.load(MODEL_PATH)
+            cls._vectorizer = joblib.load(VECTORIZER_PATH)
+        return cls._model, cls._vectorizer
+
+
+def predict_label(text: str) -> str:
+    model, vect = ClassifierSingleton.load()
+    X = vect.transform([text])
+    return model.predict(X)[0]
+
+
+def predict_with_confidence(text: str):
+    """
+    Returns (label, confidence%)
+    """
+    model, vect = ClassifierSingleton.load()
+    X = vect.transform([text])
+
+    label = model.predict(X)[0]
+    conf = float(model.confidence(X)[0])  # ensemble confidence %
+
+    return label, conf
