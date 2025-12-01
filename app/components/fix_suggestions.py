@@ -2,6 +2,7 @@ import streamlit as st
 from backend.ai_fixer import generate_fix
 from backend.code_patcher import apply_patch_to_source
 from backend.project_manager import get_full_path
+from backend.diff_utils import generate_diff
 
 
 def fix_suggestions(project_state):
@@ -55,12 +56,24 @@ def fix_suggestions(project_state):
         st.markdown("**AI-proposed fix:**")
         st.code(fixed_block, language="python")
 
+        # Side-by-side preview
+        cols = st.columns(2)
+        with cols[0]:
+            st.markdown("**Original (targeted snippet):**")
+            st.code(code_snippet, language="python")
+        with cols[1]:
+            st.markdown("**Secure rewrite:**")
+            st.code(fixed_block, language="python")
+
+        # Diff view + patched file preview
         if code_snippet and file_path:
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     source = f.read()
                 patched = apply_patch_to_source(source, code_snippet, fixed_block)
                 if patched != source:
+                    st.markdown("**Diff (before → after):**")
+                    st.code(generate_diff(source, patched), language="diff")
                     st.markdown("**Patched file preview:**")
                     st.code(patched, language="python")
                 else:

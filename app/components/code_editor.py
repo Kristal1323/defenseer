@@ -48,7 +48,9 @@ def code_editor(project_state, full_screen: bool = False, key_prefix: str = ""):
         state["active_file"] = active_file
         state["project_name"] = project_name
 
-    widget_key = f"{key_prefix}code_editor_{project_name}_{active_file}"
+    prefix = key_prefix or "inst_"
+    view_tag = "full" if full_screen else "main"
+    widget_key = f"{prefix}code_editor_{project_name}_{active_file}_{view_tag}"
 
     # Prefer Ace editor if available for syntax + line numbers
     if ACE_AVAILABLE:
