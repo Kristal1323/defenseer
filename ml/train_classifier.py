@@ -1,89 +1,115 @@
 import os
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+import joblib
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 from ml.dataset_entries import LARGE_DATASET
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import LinearSVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
 
-DATASET_CSV_PATH = os.path.join(os.path.dirname(__file__), "dataset.csv")
-VECTORIZER_PATH = os.path.join(os.path.dirname(__file__), "vectorizer_tmp.pkl")
 
-
-# ---------------------------------------------------------
-# 7.2 — Vectorizer Upgrade
-# ---------------------------------------------------------
-def build_vectorizer():
-    """
-    Return a high-quality vectorizer suitable for security-text classification.
-    """
-    return TfidfVectorizer(
-        lowercase=True,
-        sublinear_tf=True,
-        strip_accents="unicode",
-        stop_words="english",
-        ngram_range=(1, 3),
-        max_features=20000,
-    )
+DATA_DIR = os.path.dirname(__file__)
+DATASET_CSV_PATH = os.path.join(DATA_DIR, "dataset.csv")
+VECTORIZER_TMP_PATH = os.path.join(DATA_DIR, "vectorizer_tmp.pkl")
 
 
 # ---------------------------------------------------------
-# Dataset helpers (From 7.1.5)
+# Dataset Helpers
 # ---------------------------------------------------------
 def load_dataset():
-    texts = []
-    labels = []
-    for text, label in LARGE_DATASET:
-        texts.append(text)
-        labels.append(label)
+    texts, labels = zip(*LARGE_DATASET)
     df = pd.DataFrame({"text": texts, "label": labels})
     return df
 
 
-def save_dataset_csv(df: pd.DataFrame):
-    try:
-        df.to_csv(DATASET_CSV_PATH, index=False)
-        print(f"[OK] dataset.csv saved to: {DATASET_CSV_PATH}")
-    except Exception as e:
-        print(f"[ERROR] Could not write dataset.csv: {e}")
+def save_dataset_csv(df):
+    df.to_csv(DATASET_CSV_PATH, index=False)
+    print(f"[OK] dataset.csv saved at: {DATASET_CSV_PATH}")
 
 
 # ---------------------------------------------------------
-# 7.2 — Fit vectorizer ONLY (no classifiers yet)
+# Load vectorizer fitted in Commit 7.2
 # ---------------------------------------------------------
-def fit_vectorizer(df: pd.DataFrame):
-    """
-    Fit the TF-IDF vectorizer on the complete dataset (text-only).
-    Saves a temporary vectorizer for next commits.
-    """
-    print("[INFO] Fitting upgraded TF-IDF vectorizer...")
-    vectorizer = build_vectorizer()
-    vectorizer.fit(df["text"])
-
-    # Save temporarily — final vectorizer.pkl saved in commit 7.4
-    import joblib
-    joblib.dump(vectorizer, VECTORIZER_PATH)
-    print(f"[OK] Temporary vectorizer saved: {VECTORIZER_PATH}")
-
-    return vectorizer
+def load_vectorizer():
+    if not os.path.exists(VECTORIZER_TMP_PATH):
+        raise FileNotFoundError("vectorizer_tmp.pkl not found. Run commit 7.2 first.")
+    return joblib.load(VECTORIZER_TMP_PATH)
 
 
 # ---------------------------------------------------------
-# MAIN
+# Train models
+# ---------------------------------------------------------
+def train_models(X_train, y_train):
+    print("\n[TRAIN] Training LinearSVC...")
+    svc = LinearSVC()
+    svc.fit(X_train, y_train)
+
+    print("[TRAIN] Training LogisticRegression...")
+    logreg = LogisticRegression(max_iter=400)
+    logreg.fit(X_train, y_train)
+
+    print("[TRAIN] Training MultinomialNB...")
+    nb = MultinomialNB()
+    nb.fit(X_train, y_train)
+
+    return svc, logreg, nb
+
+
+# ---------------------------------------------------------
+# Evaluate model
+# ---------------------------------------------------------
+def evaluate_model(model, X_val, y_val, name):
+    preds = model.predict(X_val)
+    acc = accuracy_score(y_val, preds)
+    prec = precision_score(y_val, preds, pos_label="real")
+    rec = recall_score(y_val, preds, pos_label="real")
+
+    print(f"\n[RESULT] {name}")
+    print(f"  Accuracy:  {acc:.4f}")
+    print(f"  Precision: {prec:.4f}")
+    print(f"  Recall:    {rec:.4f}")
+
+    return acc
+
+
+# ---------------------------------------------------------
+# MAIN EXECUTION
 # ---------------------------------------------------------
 def main():
     print("[INFO] Loading dataset...")
     df = load_dataset()
-
-    print("[INFO] Dataset size:", len(df))
-    print(df["label"].value_counts())
-
-    print("[INFO] Exporting dataset.csv...")
     save_dataset_csv(df)
 
-    print("[INFO] Building TF-IDF vectorizer (Commit 7.2)...")
-    vectorizer = fit_vectorizer(df)
+    print("[INFO] Loading vectorizer (Commit 7.2)...")
+    vectorizer = load_vectorizer()
 
-    print("[DONE] Commit 7.2 complete.")
-    print("      Next: Commit 7.3 — Train SVC/LogReg/NB models.")
+    print("[INFO] Vectorizing dataset...")
+    X = vectorizer.transform(df["text"])
+    y = df["label"]
+
+    print("[INFO] Splitting into train/validation...")
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    print("[INFO] Training base models...")
+    svc, logreg, nb = train_models(X_train, y_train)
+
+    print("\n[INFO] Evaluating models...")
+    acc_svc = evaluate_model(svc, X_val, y_val, "LinearSVC")
+    acc_log = evaluate_model(logreg, X_val, y_val, "LogisticRegression")
+    acc_nb = evaluate_model(nb, X_val, y_val, "MultinomialNB")
+
+    print("\n[SUMMARY] Model Accuracy Comparison")
+    print(f"  LinearSVC:         {acc_svc:.4f}")
+    print(f"  LogisticRegression:{acc_log:.4f}")
+    print(f"  MultinomialNB:     {acc_nb:.4f}")
+
+    print("\n[DONE] Commit 7.3 complete.")
+    print("      Next: Commit 7.4 — Build ensemble + save model/vectorizer.")
 
 
 if __name__ == "__main__":
